@@ -1,0 +1,67 @@
+:: Start
+<<newcharacter Steve>>
+<<newcharacter Klara>>
+<<focus Steve>>
+
+
+<<goto [[Lobby]]>>
+
+:: Lobby
+[[Debug Room]]
+This is the lobby, there is a spike.
+<<link 'Hurt me'>><<run takeDamage(getFocus('name'), 10)>><</link>>
+
+<<link 'Take Knife'>><<giveitem 'Knife'>><</link>>
+<<link 'Throw Knife'>><<takeitem 'Knife'>><</link>>
+
+<<link 'Send Fork to not-Steve'>><<giveitem 'Klara' 'Fork of Magic'>><</link>>
+
+<<link 'Show Inventory'>><<inventory>><</link>>
+
+<<link 'Stab Cushion'>>\
+<<if hasItem(getFocus('name'), 'Knife')>><<goto [[Stab Zone]]>><<else>><<goto [[UnStab Zone]]>><</if>>
+<</link>>
+
+:: Stab Zone
+You won.
+[[Lobby]]
+
+:: UnStab Zone
+You lost.
+[[Lobby]]
+
+:: Fork Zone
+How about a spork?
+
+[[Lobby]]
+
+:: Debug Room
+[[Lobby]]
+
+You are <<getfocus 'name'>> with <<getfocus 'health'>> health.
+<<showhealth>>
+
+<<if getFocus('name') == 'Steve'>>\
+Klara: Hey. <<link 'Become Klara'>><<focus Klara>><<goto [[Debug Room]]>><</link>>
+<</if>>\
+<<if getFocus('name') == 'Klara'>>\
+Steve: Hey. <<link 'Become Steve'>><<focus Steve>><<goto [[Debug Room]]>><</link>>
+<</if>>\
+
+:: StoryInit
+<<run setupRPG()>>
+<<defhook 'Knife' 'inventory'>>
+<<goto [[Stab Zone]]>>
+<</defhook>>
+
+<<defhook 'Fork of Magic' 'inventory'>>
+<<goto [[Fork Zone]]>>
+<</defhook>>
+
+:: StoryTitle
+A test
+
+:: StoryData
+{
+	"ifid": "7A858D87-DE11-4B1B-A54A-0B48BEB01366"
+}
