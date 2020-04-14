@@ -74,28 +74,30 @@ macro to check if you have an item, same format as give/take
 
 ## TODO
 Not a complete list, will change over time.
-- [ ] Way of characters and items "existing" in specific passage
- - [ ] In the passage-ready event(?) check through characters/obj to find which have their location var set to it
-   - [ ] Give a link to the objects `use-world` event
-- [ ] Change the item using system to be more like an events system
- - [x] Object of item names and event sub-objects
- - [x] Macro to add events
- - [ ] Macro for triggering events
-   - [ ] `<<hook 'item' 'hook'>>`
-- [ ] Switchable characters
- - [ ] Seems to work, keep testing in other scenarios
- - [ ] Menu for switching characters
-   - [ ] State variable list for controlling which characters populate it
-- [ ] Items
- - [ ] Wearables
- - [X] Usage
- - [ ] Crafting
- - [ ] Helper macro for trading items between characters
-- [ ] Skills
- - [ ] Checks
- - [ ] Leveling
-- [ ] Combat
-- [ ] Dialog
-- [ ] Quest log
-- [ ] Notes
-- [ ] Playing card library, with images (Maybe seperate, or integrate with items)
+   - [ ] Way of characters and items "existing" in specific passage
+	 - [ ] In the passage-ready event(?) check through characters/obj to find which have their location var set to it 
+	   - [ ] Give a link to the objects `use-world` event
+	   - [ ] Alterative idea for showing objects, macro that provides a list, like inventory, but not
+   - [-] Change the item using system to be more like an events system
+	 - [X] Object of item names and event sub-objects
+	 - [X] Macro to add events
+	 - [ ] Macro for triggering events
+	   - [ ] <<hook 'item' 'hook'>>
+   - [-] Switchable characters
+	 - [X] Seems to work, keep testing in other scenarios
+	 - [-] Menu for switching characters
+	   - [X] State variable list for controlling which characters populate it
+	   - [ ] When object locations is implemented, make it "change" passage to where the new character is
+   - [-] Items
+     - [ ] Wearables
+	 - [X] Usage
+	 - [ ] Crafting
+	 - [ ] Helper macro for trading items between characters
+   - [ ] Skills
+	 - [ ] Checks
+	 - [ ] Leveling
+   - [ ] Dialog
+   - [ ] Combat
+   - [ ] Quest log
+   - [ ] Notes
+   - [ ] Playing card library, with images (Maybe seperate, or integrate with items)

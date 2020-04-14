@@ -2,11 +2,13 @@
 Move Gathering in to this system once inventory is solidified
 
 */
+Array.prototype.cut = function(target){	this.splice (this.indexOf(target), 1); };
 
 (function(){
 	window.setupRPG = function(){
 		State.setVar('$template_char', {'health': 100, 'healthmax': 100});
 		State.setVar('$item_hooks', {});
+		State.setVar('$focusable', []);
 	};
 	window.showEnergy = function(char, ){
 		window.getChar(char)
@@ -128,7 +130,7 @@ Move Gathering in to this system once inventory is solidified
 				i = this.args[1];
 			}
 			
-			t.inventory.push(i);
+			t.inventory.cut(i);
 			return 1;
 		}});
 	
@@ -177,11 +179,25 @@ Move Gathering in to this system once inventory is solidified
 			Dialog.open();
 		}});
 
+	Macro.add('focusmenu', {
+		handler:function(){
+			let t = State.getVar('$focusable');
+
+			let body = "";
+
+			for (const item of t){
+				body += `''${item}'' <<link '[ Switch ]'>><<run Dialog.close()>><<focus '${item}'>><</link>>\n`;
+
+			}
+			Dialog.setup(`Switch Character`);
+			Dialog.wiki(body);
+			Dialog.open();
+		}});
 	
 	Macro.add('gather', {});
 	Macro.add('focus', {
 		handler: function(){
-			window.focusControl(this.args.full);
+			window.focusControl(this.args[0]);
 		}
 	});
 	
@@ -191,6 +207,26 @@ Move Gathering in to this system once inventory is solidified
 				jQuery(this.output).wiki(window.getFocus('name'));
 			else
 				jQuery(this.output).wiki(window.getFocus(this.args[0]));
+		}
+	});
+	
+	Macro.add('addfocus', {
+		handler: function(){
+			let names = State.getVar('$focusable');
+			for (const name of this.args){
+				if (!names.includes(name)) names.push(name);
+			}
+			State.setVar('$focusable', names);
+		}
+	});
+	
+	Macro.add('removefocus', {
+		handler: function(){
+			let names = State.getVar('$focusable');
+			for (const name of this.args){
+				if (names.includes(name)) names.cut(name);
+			}
+			State.setVar('$focusable', names);
 		}
 	});
 	
