@@ -8,8 +8,20 @@
 
 :: Lobby
 [[Debug Room]]
+[[Upstairs]] | [[Downstairs]]
 This is the lobby, there is a spike.
 <<link 'Hurt me'>><<run takeDamage(getFocus('name'), 10)>><</link>>
+
+<<link 'Read (Lockpicking for Dummies)'>>\
+	    <<if skillCheck('lockpick', 0)>>\
+	   		<<qdiag 'Fail' 'You already read this.'>>
+		<<else>>
+			<<diag 'Learned'>>
+			You learn how to crack simple locks.
+			<<forcetrainskill 'lockpick'>>
+			<</diag>>
+		<</if>>
+<</link>>
 
 <<link 'Take Knife'>><<giveitem 'Knife'>><</link>>
 <<link 'Throw Knife'>><<takeitem 'Knife'>><</link>>
@@ -19,6 +31,25 @@ This is the lobby, there is a spike.
 <<link 'Stab Cushion'>>\
 <<if hasItem(getFocus('name'), 'Knife')>><<goto [[Stab Zone]]>><<else>><<goto [[UnStab Zone]]>><</if>>
 <</link>>
+
+:: Downstairs
+You are downstairs.
+[[Lobby]]
+<<skillcheck 'lockpick' 1>>
+You can do this.
+<</skillcheck>>
+
+<<link 'Open Chest'>>\
+	    <<if skillCheck('lockpick', 1)>>\
+	   		<<qdiag 'Success' 'You pick the lock!'>>
+		<<else>>
+			<<qdiag 'Fail' 'You fail to pick the lock...'>>
+		<</if>>
+<</link>>
+
+:: Upstairs
+You are upstairs.
+[[Lobby]]
 
 :: Stab Zone
 You won.
