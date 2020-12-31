@@ -1,8 +1,9 @@
 :: Start
 <<newcharacter Steve>>
 <<newcharacter Klara>>
-<<focus 'Steve'>>
-<<addfocus 'Steve' 'Klara'>>
+<<focus Steve>>
+<<addfocus Klara>>
+<<addfocus Steve'>>
 
 <<goto [[Lobby]]>>
 
@@ -71,10 +72,10 @@ You are <<getfocus 'name'>> with <<getfocus 'health'>> health.
 <<showhealth>>
 
 <<if getFocus('name') == 'Steve'>>\
-Klara: Hey. <<link 'Become Klara'>><<focus 'Klara'>><<goto [[Debug Room]]>><</link>>
+Klara: Hey. <<link 'Become Klara'>><<focus Klara>><<goto [[Debug Room]]>><</link>>
 <</if>>\
 <<if getFocus('name') == 'Klara'>>\
-Steve: Hey. <<link 'Become Steve'>><<focus 'Steve'>><<goto [[Debug Room]]>><</link>>
+Steve: Hey. <<link 'Become Steve'>><<focus Steve>><<goto [[Debug Room]]>><</link>>
 <</if>>\
 
 :: StoryMenu
