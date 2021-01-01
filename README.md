@@ -13,13 +13,34 @@ They are assigned by itemname and hookname.
 Default `inventory` hook is triggered when used from the built-in inventory screen.
 Whatever is contained between the tags is what gets run.
 
-<<defhook 'Knife' 'inventory'>>
+<<defhook 'Knife of Physicality' 'inventory'>>
 <<goto [[Stab Zone]]>>
 <</defhook>>
 
 <<defhook 'Fork of Magic' 'inventory'>>
 <<goto [[Fork Zone]]>>
 <</defhook>>
+
+Groups are ways of defining functionality of items within the world.
+By adding these items to the `melee` group, the javascript function `hasItemOf(grp)` returns the first 
+item from that group that the focus character has, or an empty string if they have none.
+<<defgroup 'melee' 'Knife of Physicality' 'Fork of Magic'>>
+
+Zone items are an optional feature to define a list of items that exists within each passage, or "zone" as referred to internally.
+Giving a passage items will let you automate some basic item gathering functionality when used alongside other functions that access this list.
+Alongside this setter, there is the addtozone and removefromzone macros, with the format of;
+addto/removefromzone 'name' 'item list'...
+<<defzoneitems 'Lobby' 'Wine Bottle' 'Liquor Bottle' 'Crowbar' 'Binoculars'>>
+
+:: StoryCaption
+`here` is a special keyword used mostly when a javascript function takes a zone/passage for input.
+It auto replaces with the currently active passage name.
+In this example, zoneHasItems checks the variable for zoneitems as defined above, and returns true if the list is not empty, and zoneitems macro produces a clickable list, which lets players take items out of the zone, and adds them to player inventory.
+
+<<if zoneHasItems('here')>>\
+There are items here:
+<<zoneitems>>
+<</if>>
 
 :: Start
 Create character data
@@ -29,6 +50,9 @@ Create character data
 Choose who to "focus" on, e.i. who the macro selections default to, basically what character we're "playing as".
 <<focus Steve>>
 
+Add focus adds these names to the Focus list, a built-in menu for changing characters.
+<<addfocus Steve>>
+<<addfocus Kloe>>
 
 :: Lobby
 
@@ -40,7 +64,7 @@ showhealth macro displays health in a pleasant bar format
 getFocus global javascript function works like the macro
 This is basically a check to see who we're playing as.
 <<if getFocus('name') == 'Steve'>>\
-'Kloe': Hey. <<link 'Become 'Kloe'>><<focus 'Kloe'>><<goto [[Lobby]]>><</link>>
+'Kloe': Hey. <<link 'Become Kloe'>><<focus Kloe>><<goto [[Lobby]]>><</link>>
 <</if>>\
 <<if getFocus('name') == 'Kloe'>>\
 Steve: Hey. <<link 'Become Steve'>><<focus Steve>><<goto [[Lobby]]>><</link>>
@@ -52,7 +76,7 @@ This is the lobby, there is a spike.
 takeDamage is a global JS function to damage a character (shocking)
 format is takeDamage(character_name, damage)
 Macro coming soon (tm)
-<<link 'Hurt me'>><<run takeDamage(getFocus('name'), 10)>><</link>>
+<<link 'Hurt me'>><<run takeDamage(getFocusName(), 10)>><</link>>
 
 giveitem is a macro to add an item to the current focus'd player
 
@@ -68,7 +92,7 @@ macro shortcut to display a popup inventory
 
 macro to check if you have an item, same format as give/take
 <<link 'Stab Cushion'>>\
-<<if hasItem(getFocus('name'), 'Knife')>><<goto [[Stab Zone]]>><<else>><<goto [[UnStab Zone]]>><</if>>
+<<if hasItem(getFocusName(), 'Knife of Physicality')>><<goto [[Stab Zone]]>><<else>><<goto [[UnStab Zone]]>><</if>>
 <</link>>
 ```
 
