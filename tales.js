@@ -14,9 +14,58 @@ var item_hooks = {};
         State.setVar('$focus', '');
         State.setVar('$characters', []);
         State.setVar('$zone_items', {});
+        State.setVar('$containers', {});
+        State.setVar('$flags', {});
+        State.setVar('$zone_flags', {});
         //Default strings
         State.setVar('$msg_noskilltrain', "Can't train a skill you dont have.");
     };
+    
+    window.getFlag = function(k) {
+        if(window.getv("flags")[k] != undefined) return window.getv("flags")[k].toString();
+        return "undefined";
+    }
+    window.getZoneFlag = function(z, k) {
+        if(z == "here") z = State.passage;
+        if(window.getv("zone_flags")[z] != undefined && window.getv("zone_flags")[z][k] != undefined) 
+            return window.getv("zone_flags")[z][k].toString();
+        return "undefined";
+    }
+    Macro.add('reload', {
+        handler: function(){
+            Dialog.close();
+            $(this.output).wiki(`<<goto '${State.passage}'>>`);
+        }
+    });
+    Macro.add('setflag', {
+        handler: function(){
+            let k = this.args[0];
+            let v = this.args[1];
+            let f = window.getv("flags", {});
+            f[k] = v;
+            State.setVar("$flags", f);
+    }});
+    
+    Macro.add('setzoneflag', {
+        handler: function(){
+            let k = null;
+            let v = null;
+            let z = null;
+            if (this.args.length == 2){
+                k = this.args[0];
+                v = this.args[1];
+                z = State.passage;
+            } else if (this.args.length == 3){
+                z = this.args[0];
+                k = this.args[1];
+                v = this.args[2];
+            }
+            console.log(`Setting zone ${z}`);
+            let f = window.getv("zone_flags", {});
+            if(f[z] == undefined) f[z] = {}
+            f[z][k] = v;
+            State.setVar("$zone_flags", f);
+    }});
     
     Macro.add('newcharacter', {
         handler: function(){
@@ -178,14 +227,37 @@ var item_hooks = {};
     
 
     // Inventory
-    window.hasItem = function(target, item){
-        let c = window.getChar(target);
-        return (c.inventory.includes(item));
-    };
-    window.playerHasItem = function(item){
-        let c = window.getChar();
-        return (c.inventory.includes(item));
-    };
+    Macro.add('defconitems', {
+        handler:function(){
+        var z = window.getv("containers", {})
+        var ary = Array.from(this.args)
+        var n = ary.shift()
+        z[n] = ary;
+        State.setVar("$containers", z)
+    }});
+    
+    Macro.add('conitems', {
+        handler:function(){
+            let data = window.getv("containers", {});
+            $(this.output).wiki(data[this.args.full].join(", "));
+    }});
+    
+    Macro.add('addtocontainer', {
+        handler:function(){
+        var z = window.getv("containers", {})
+        if(z[this.args[0]] == undefined) z[this.args[0]] = [];
+        z[this.args[0]].push(this.args[1]);
+        State.setVar("$containers", z)
+    }});
+    
+    Macro.add('removefromcontainer', {
+        handler:function(){
+        var z = window.getv("containers", {})
+        if(z[this.args[0]] == undefined) z[this.args[0]] = [];
+        z[this.args[0]].cut(this.args[1]);
+        State.setVar("$containers", z)
+    }});
+    
     Macro.add('defzoneitems', {
         handler:function(){
         var z = window.getv("zone_items", {})
@@ -194,13 +266,75 @@ var item_hooks = {};
         z[n] = ary;
         State.setVar("$zone_items", z)
     }});
+    
+    Macro.add('addtozone', {
+        handler:function(){
+            if(this.args[0] == "here") this.args[0] = State.passage;
+            var z = window.getv("zone_items", {})
+            if(z[this.args[0]] == undefined) z[this.args[0]] = [];
+            z[this.args[0]].push(this.args[1]);
+            State.setVar("$zone_items", z)
+    }});
+    
+    Macro.add('removefromzone', {
+        handler:function(){
+            if(this.args[0] == "here") this.args[0] = State.passage;
+            var z = window.getv("zone_items", {})
+            if(z[this.args[0]] == undefined) z[this.args[0]] = [];
+            z[this.args[0]].cut(this.args[1]);
+            State.setVar("$zone_items", z)
+    }});
+    
     Macro.add('zoneitems', {
         handler:function(){
             let data = window.getv("zone_items", {});
-            
-            $(this.output).wiki(data[this.args.full].join(", "));
-
+            if(data[State.passage] != undefined){
+                let body = [];
+                for(const item of data[State.passage]){
+                    body.push(`<<link '${item}'>>
+                    <<giveitem '${item}'>><<removefromzone 'here' '${item}'>><<reload>>
+                    <</link>>`);
+                }
+                $(this.output).wiki(body.join(", "));
+            }
+                
     }});
+    
+    window.hasItem = function(target, item){
+        let c = window.getChar(target);
+        return (c.inventory.includes(item));
+    };
+    window.playerHasItem = function(item){
+        let c = window.getChar();
+        return (c.inventory.includes(item));
+    };
+    
+    window.zoneHasItem = function(zone, item){
+        if(zone == "here") zone = State.passage;
+        let data = window.getv("zone_items", {});
+        if(data[zone] == undefined) return false;
+        if(data[zone].includes(item)) return true;
+        return false;
+    };
+    window.zoneHasItems = function(zone){
+        if(zone == "here") zone = State.passage;
+        let data = window.getv("zone_items", {});
+        if(data[zone] == undefined) return false;
+        if(data[zone].length > 0) return true;
+        return false;
+    };
+    window.conHasItem = function(c, item){
+        let data = window.getv("containers", {});
+        if(data[c] == undefined) return false;
+        if(data[c].includes(item)) return true;
+        return false;
+    };
+    window.conHasItems = function(c){
+        let data = window.getv("containers", {});
+        if(data[c] == undefined) return false;
+        if(data[c].length > 0) return true;
+        return false; 
+    };
     Macro.add('takeitem', {
         handler:function(){
             let t = null;
@@ -247,21 +381,19 @@ var item_hooks = {};
     Macro.add('inventory', {
         handler:function(){
             let t = null;
-            
-            if(this.args.length == 0)
-                t = window.getFocus();
-            else
-                t = window.getChar(this.args.full);
-            
             let body = "";
-            console.log("Hooks:");
-            console.log(item_hooks);
+            
+            if(this.args.length == 0)  t = window.getFocus();
+            else                       t = window.getChar(this.args.full);
+            
             for (const item of t.inventory){
+                body += `<<link '[Drop]'>><<run Dialog.close()>><<takeitem '${item}'>><<addtozone 'here' '${item}'>><<reload>><</link>>`;
                 body += `''${item}''`;
                 if(item_hooks[item] != undefined && item_hooks[item]['inventory'] != undefined){
                     let i = item_hooks[item]['inventory'];
-                    body += ` <<link '[#]'>><<run Dialog.close()>>${i}<</link>>`;
+                    body += ` <<link '[Use]'>><<run Dialog.close()>>${i}<</link>>`;
                 }
+                
                 body += "\n";
             }
             Dialog.setup(`${t.name}'s Inventory`);
@@ -357,4 +489,4 @@ var item_hooks = {};
 
 
 
-})();	
+})();
