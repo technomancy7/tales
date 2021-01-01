@@ -1,13 +1,19 @@
 Array.prototype.cut = function(target){ this.splice (this.indexOf(target), 1); };
 
 var template_char = {'health': 100, 'healthmax': 100, "energy": 100, "energymax": 100, "oxygen": 100,'inventory': [], 'skills': {} };
+var item_hooks = {};
 (function(){
     //Initialization and internals
+    window.getv = function(key, defaultv = undefined){
+        let v = State.getVar(`$${key}`)
+        if (v == undefined || v == null) return defaultv;
+        return v;
+    }
     window.setupRPG = function(){
-        State.setVar('$item_hooks', {});
         State.setVar('$focusable', []);
         State.setVar('$focus', '');
         State.setVar('$characters', []);
+        State.setVar('$zone_items', {});
         //Default strings
         State.setVar('$msg_noskilltrain', "Can't train a skill you dont have.");
     };
@@ -36,7 +42,8 @@ var template_char = {'health': 100, 'healthmax': 100, "energy": 100, "energymax"
     Macro.add('diag', {
         tags: ['main'],
         handler: function(){
-            if (this.args.length == 0) Dialog.setup(this.args[0]); else Dialog.setup("Dialog");
+            if (this.args.length != 0) Dialog.setup(this.args.full); 
+            else Dialog.setup("Dialog");
             Dialog.wiki(this.payload[0].contents);
             Dialog.open();
         }
@@ -51,23 +58,21 @@ var template_char = {'health': 100, 'healthmax': 100, "energy": 100, "energymax"
     Macro.add('defhook', {
         tags: ['main'],
         handler: function(){
-            console.log(this.payload);
+            console.log("Payload:")
+            console.log(this.payload[0].contents)
             let data = this.payload[0].contents;
-            let items = State.getVar('$item_hooks');
+            console.log(data);
             let title = this.args[1];
-            if (items[this.args[0]] == undefined) items[this.args[0]] = {};
-            items[this.args[0]][title] = data;
-            State.setVar('$item_hooks', items);
+            if (item_hooks[this.args[0]] == undefined) item_hooks[this.args[0]] = {};
+            item_hooks[this.args[0]][title] = data;
+            console.log(item_hooks)
         }
     });
     
     // Character Control
     window.getChar = function (name = null) {
-        console.log(`name: ${name}`)
-        if (name == null) name = State.getVar("$focus");
-        console.log(`name: ${name}`)    
+        if (name == null) name = State.getVar("$focus");  
         let chars = State.getVar('$characters');
-        console.log(chars);
         for (var index = 0; index < chars.length; index++){
             let c = chars[index];
             if (c.name == name){  return c;   }
@@ -177,6 +182,25 @@ var template_char = {'health': 100, 'healthmax': 100, "energy": 100, "energymax"
         let c = window.getChar(target);
         return (c.inventory.includes(item));
     };
+    window.playerHasItem = function(item){
+        let c = window.getChar();
+        return (c.inventory.includes(item));
+    };
+    Macro.add('defzoneitems', {
+        handler:function(){
+        var z = window.getv("zone_items", {})
+        var ary = Array.from(this.args)
+        var n = ary.shift()
+        z[n] = ary;
+        State.setVar("$zone_items", z)
+    }});
+    Macro.add('zoneitems', {
+        handler:function(){
+            let data = window.getv("zone_items", {});
+            
+            $(this.output).wiki(data[this.args.full].join(", "));
+
+    }});
     Macro.add('takeitem', {
         handler:function(){
             let t = null;
@@ -230,11 +254,12 @@ var template_char = {'health': 100, 'healthmax': 100, "energy": 100, "energymax"
                 t = window.getChar(this.args.full);
             
             let body = "";
-
+            console.log("Hooks:");
+            console.log(item_hooks);
             for (const item of t.inventory){
                 body += `''${item}''`;
-                if(State.getVar('$item_hooks')[item] != undefined && State.getVar('$item_hooks')[item]['inventory'] != undefined){
-                    let i = State.getVar('$item_hooks')[item]['inventory'];
+                if(item_hooks[item] != undefined && item_hooks[item]['inventory'] != undefined){
+                    let i = item_hooks[item]['inventory'];
                     body += ` <<link '[#]'>><<run Dialog.close()>>${i}<</link>>`;
                 }
                 body += "\n";
