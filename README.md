@@ -3,6 +3,10 @@ A work-in-progress RPG functionality library.
 Still in early days, but the idea is a library that adds a bunch of features
 to Twine that allows for deeper mechanics and systems, through scripting and macros.
 
+Demos are available, games built using this library: (note, heavily WIP)\
+https://codedmind.gitlab.io/winter/ \
+https://codedmind.gitlab.io/dxd/
+
 ```
 :: StoryInit
 Setup backend variables
