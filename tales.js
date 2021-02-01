@@ -97,14 +97,29 @@ var done_setup = false;
     Macro.add('newcharacter', {
         handler: function(){
             let name = this.args.full;
-        if(getChar(name) != undefined) return;
+            if(getChar(name) != undefined) return;
             let c = getv('characters', []);
             let newc = JSON.parse(JSON.stringify(template_char));
             newc.name = name;
             c.push(newc);
             State.setVar('$characters', c);
     }});
-    
+    Macro.add('getcharprop', {
+        handler: function(){
+            let name = this.args[0];
+            if(name == "self") name == null;
+            let t = getChar(name);
+            if(t == undefined) return;
+            $(this.output).wiki(`${t[this.args[1]]}`);
+    }});
+    window.getCharProp = function(name, key){
+        let t = getChar(name);
+        return t[key];
+    }
+    window.setCharProp = function(name, key, value){
+        let t = getChar(name);
+        t[key] = value;
+    }
     window.defMsg = function(tablekey, defaultmsg){
         let m = State.getVar(`$msg_${tablekey}`);
         if(m != undefined) return defaultmsg;
